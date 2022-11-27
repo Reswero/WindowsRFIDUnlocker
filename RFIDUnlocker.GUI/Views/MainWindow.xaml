@@ -4,9 +4,135 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RFIDUnlocker.GUI"
+        xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Windows RFID Unlocker"
+        Height="450" Width="800"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen">
     <Grid>
+        <TabControl Style="{StaticResource MaterialDesignFilledTabControl}"
+                    TabStripPlacement="Top">
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <md:PackIcon Kind="BusinessCard"
+                                     Foreground="White"
+                                     Margin="0 4 5 0"/>
+                        <TextBlock FontSize="16"
+                                   Foreground="White">Карты</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
 
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.7*"/>
+                        <ColumnDefinition Width="0.3*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0"
+                          Margin="0 0 5 0">
+                        <Border BorderThickness="1"
+                                BorderBrush="Gray"
+                                CornerRadius="3">
+                            
+                        </Border>
+                    </Grid>
+
+                    <Grid Grid.Column="1"
+                          Margin="5 0 0 0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="0.3*"/>
+                            <RowDefinition Height="0.7*"/>
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Row="0"
+                                    Orientation="Vertical"
+                                    VerticalAlignment="Center">
+                            <Button FontSize="14"
+                                    Foreground="White"
+                                    Margin="0 0 0 10">Обновить</Button>
+                            <Button FontSize="14"
+                                    Foreground="White">Добавить</Button>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1"
+                                    Orientation="Vertical"
+                                    VerticalAlignment="Center">
+                            <TextBox IsReadOnly="True"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     FontSize="14"
+                                     md:HintAssist.Hint="Идентификатор карты"
+                                     md:HintAssist.FloatingScale="0.9"
+                                     Margin="0 0 0 10"></TextBox>
+                            <TextBox FontSize="14"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     md:HintAssist.Hint="Название карты"
+                                     md:HintAssist.FloatingScale="0.9"
+                                     Margin="0 0 0 10"></TextBox>
+                            <Button FontSize="14"
+                                    Foreground="White"
+                                    Margin="0 0 0 10">Сохранить</Button>
+                            <Button FontSize="14"
+                                    Foreground="White"
+                                    Margin="0 0 0 10">Удалить</Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <md:PackIcon Kind="Settings"
+                                     Foreground="White"
+                                     Margin="0 4 5 0"/>
+                        <TextBlock FontSize="16"
+                                   Foreground="White">Настройки</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="1"
+                                Orientation="Vertical"
+                                VerticalAlignment="Center">
+                        <TextBox FontSize="14"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                     md:HintAssist.Hint="Пароль"
+                                     md:HintAssist.FloatingScale="0.9"
+                                     Margin="0 0 0 10"></TextBox>
+                        <Button FontSize="14"
+                                    Foreground="White"
+                                    Margin="0 0 0 10">Задать</Button>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem>
+                <TabItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <md:PackIcon Kind="Journal"
+                                     Foreground="White"
+                                     Margin="0 4 5 0"/>
+                        <TextBlock FontSize="16"
+                                   Foreground="White">Журнал</TextBlock>
+                    </StackPanel>
+                </TabItem.Header>
+
+                <Grid Margin="10">
+                    <Border BorderThickness="1"
+                            BorderBrush="Gray"
+                            CornerRadius="3">
+                        <ListBox></ListBox>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>
