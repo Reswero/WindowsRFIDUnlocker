@@ -12,7 +12,8 @@
         WindowStartupLocation="CenterScreen">
     <Grid>
         <TabControl Style="{StaticResource MaterialDesignFilledTabControl}"
-                    TabStripPlacement="Top">
+                    TabStripPlacement="Top"
+                    SelectedIndex="1">
             <TabItem>
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal">
@@ -96,12 +97,26 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
-                        <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0"
+                                Orientation="Vertical"
+                                VerticalAlignment="Center"
+                                MaxWidth="250px">
+                        <ComboBox FontSize="14"
+                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                  md:HintAssist.Hint="COM-Порт"
+                                  md:HintAssist.FloatingScale="0.9"
+                                  Margin="0 0 0 10"></ComboBox>
+                        <Button FontSize="14"
+                                    Foreground="White"
+                                    Margin="0 0 0 10">Подключиться</Button>
+                    </StackPanel>
                     
                     <StackPanel Grid.Column="1"
                                 Orientation="Vertical"
-                                VerticalAlignment="Center">
+                                VerticalAlignment="Center"
+                                MaxWidth="250px">
                         <TextBox FontSize="14"
                                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                      md:HintAssist.Hint="Пароль"
