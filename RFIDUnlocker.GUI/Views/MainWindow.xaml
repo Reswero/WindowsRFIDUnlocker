@@ -5,11 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RFIDUnlocker.GUI"
         xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:vm="clr-namespace:RFIDUnlocker.GUI.ViewModels"
         mc:Ignorable="d"
         Title="Windows RFID Unlocker"
         Height="450" Width="800"
         ResizeMode="CanMinimize"
         WindowStartupLocation="CenterScreen">
+    <Window.DataContext>
+        <vm:MainWindowViewModel/>
+    </Window.DataContext>
+    
     <Grid>
         <TabControl Style="{StaticResource MaterialDesignFilledTabControl}"
                     TabStripPlacement="Top"
@@ -103,7 +108,8 @@
                                 Orientation="Vertical"
                                 VerticalAlignment="Center"
                                 MaxWidth="250px">
-                        <ComboBox FontSize="14"
+                        <ComboBox ItemsSource="{Binding COMPortNames}"
+                                  FontSize="14"
                                   Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                   md:HintAssist.Hint="COM-Порт"
                                   md:HintAssist.FloatingScale="0.9"
