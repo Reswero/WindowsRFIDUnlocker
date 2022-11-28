@@ -58,7 +58,8 @@
                             <Button FontSize="14"
                                     Foreground="White"
                                     Margin="0 0 0 10">Обновить</Button>
-                            <Button FontSize="14"
+                            <Button Command="{Binding AddCard}"
+                                    FontSize="14"
                                     Foreground="White">Добавить</Button>
                         </StackPanel>
 
@@ -109,14 +110,16 @@
                                 VerticalAlignment="Center"
                                 MaxWidth="250px">
                         <ComboBox ItemsSource="{Binding COMPortNames}"
+                                  SelectedItem="{Binding SelectedCOMPortName}"
                                   FontSize="14"
                                   Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                   md:HintAssist.Hint="COM-Порт"
                                   md:HintAssist.FloatingScale="0.9"
                                   Margin="0 0 0 10"></ComboBox>
-                        <Button FontSize="14"
-                                    Foreground="White"
-                                    Margin="0 0 0 10">Подключиться</Button>
+                        <Button Command="{Binding ConnectCOMPort}"
+                                FontSize="14"
+                                Foreground="White"
+                                Margin="0 0 0 10">Подключиться</Button>
                     </StackPanel>
                     
                     <StackPanel Grid.Column="1"
