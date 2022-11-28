@@ -10,6 +10,9 @@
 
 #define MAX_LED_BRIGHTNESS 30
 
+#define BUZZER_PIN 11
+#define MAX_BUZZER_FREQUENCY 100
+
 MFRC522 RFID(RFID_SS_Pin, RFID_RST_Pin);
 
 void setup() {
@@ -65,11 +68,13 @@ bool IsUidValid(String uid) {
 
 void GrantAccess() {
   BlinkLed(GREEN_LED_PIN);
+  PlayAccessSound();
   EnterPassword();
 }
 
 void DenyAccess() {
   BlinkLed(RED_LED_PIN);
+  PlayDenySound();
 }
 
 void BlinkLed(int ledPin) {
@@ -99,4 +104,22 @@ void EnterPassword() {
 
   Keyboard.press(KEY_RETURN);
   Keyboard.releaseAll();
+}
+
+void PlayAccessSound() {
+  for (int i = 0; i < 3; i++) {
+    delay(100);
+    tone(BUZZER_PIN, MAX_BUZZER_FREQUENCY);
+    delay(100);
+    noTone(BUZZER_PIN);
+  }
+}
+
+void PlayDenySound() {
+  for (int i = 0; i < 2; i++) {
+    delay(100);
+    tone(BUZZER_PIN, MAX_BUZZER_FREQUENCY);
+    delay(200);
+    noTone(BUZZER_PIN);
+  }
 }
