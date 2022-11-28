@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO.Ports;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 
 namespace RFIDUnlocker.GUI.ViewModels
 {
@@ -18,6 +19,7 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 		public ObservableCollection<string> COMPortNames { get; set; }
 		public string SelectedCOMPortName { get; set; }
+		public string Password { get; set; }
 
 		#region
 
@@ -38,25 +40,53 @@ namespace RFIDUnlocker.GUI.ViewModels
 				}
 			});
 
+		private RelayCommand _disconnectCOMPort;
+		public RelayCommand DisconnectCOMPort
+			=> _disconnectCOMPort ??= new(_ =>
+			{
+				//
+				// TODO
+				//
+			});
+
+		private RelayCommand _setPassword;
+		public RelayCommand SetPassword
+			=> _setPassword ??= new(_ =>
+			{
+				if (string.IsNullOrEmpty(Password) is false)
+				{
+					SecuritySettings settings = new(Password);
+					SendRequest(Command.SetPassword, settings);
+				}
+			});
+
 		private RelayCommand _addCard;
 		public RelayCommand AddCard
 			=> _addCard ??= new(_ =>
 			{
-				if (_serialPort != null)
-				{
-					SendRequest(Command.Add);
-				}
+				SendRequest(Command.Add);
 			});
 
 		#endregion
 
-		private void SendRequest(string command)
+		private void SendRequest(string command, object? data = null)
 		{
-			string request = $"<?{command}>";
+			string request = $"<?{command}";
 
-			_serialPort.Open();
-			_serialPort.Write(request);
-			_serialPort.Close();
+			if (data is not null)
+			{
+				string json = JsonSerializer.Serialize(data, data.GetType());
+				request += $"|{json}";
+			}
+
+			request += ">";
+
+			if (_serialPort is not null)
+			{
+				_serialPort.Open();
+				_serialPort.Write(request);
+				_serialPort.Close();
+			}
 		}
 
 		public event PropertyChangedEventHandler? PropertyChanged;
