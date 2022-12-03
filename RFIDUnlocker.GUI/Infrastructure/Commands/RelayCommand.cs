@@ -22,12 +22,12 @@ namespace RFIDUnlocker.GUI.Infrastructure.Commands
 
 		public bool CanExecute(object? parameter)
 		{
-			return _canExecute == null || _canExecute(parameter);
+			return _canExecute == null || _canExecute(parameter!);
 		}
 
 		public void Execute(object? parameter)
 		{
-			_execute(parameter);
+			_execute(parameter!);
 		}
 	}
 }

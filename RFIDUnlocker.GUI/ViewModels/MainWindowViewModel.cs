@@ -15,16 +15,16 @@ namespace RFIDUnlocker.GUI.ViewModels
 			COMPortNames = new(SerialPort.GetPortNames());
 		}
 
-		private SerialPort _serialPort;
+		private SerialPort? _serialPort;
 
 		public ObservableCollection<string> COMPortNames { get; set; }
-		public string SelectedCOMPortName { get; set; }
-		public string Password { get; set; }
+		public string? SelectedCOMPortName { get; set; }
+		public string? Password { get; set; }
 
 		#region Commands
 
-		private RelayCommand _connectCOMPort;
-		public RelayCommand ConnectCOMPort 
+		private RelayCommand? _connectCOMPort;
+		public RelayCommand? ConnectCOMPort 
 			=> _connectCOMPort ??= new(_ =>
 			{
 				if (SelectedCOMPortName != null)
@@ -42,17 +42,15 @@ namespace RFIDUnlocker.GUI.ViewModels
 				}
 			});
 
-		private RelayCommand _disconnectCOMPort;
-		public RelayCommand DisconnectCOMPort
+		private RelayCommand? _disconnectCOMPort;
+		public RelayCommand? DisconnectCOMPort
 			=> _disconnectCOMPort ??= new(_ =>
 			{
-				//
-				// TODO
-				//
+				_serialPort?.Close();
 			});
 
-		private RelayCommand _setPassword;
-		public RelayCommand SetPassword
+		private RelayCommand? _setPassword;
+		public RelayCommand? SetPassword
 			=> _setPassword ??= new(_ =>
 			{
 				if (string.IsNullOrEmpty(Password) is false)
@@ -62,15 +60,15 @@ namespace RFIDUnlocker.GUI.ViewModels
 				}
 			});
 
-		private RelayCommand _addCard;
-		public RelayCommand AddCard
+		private RelayCommand? _addCard;
+		public RelayCommand? AddCard
 			=> _addCard ??= new(_ =>
 			{
 				SendRequest(Command.Add);
 			});
 
-		private RelayCommand _close;
-		public RelayCommand Close
+		private RelayCommand? _close;
+		public RelayCommand? Close
 			=> _close ??= new(_ =>
 			{
 				_serialPort?.Close();

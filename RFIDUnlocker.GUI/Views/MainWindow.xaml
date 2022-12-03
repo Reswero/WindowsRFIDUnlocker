@@ -139,7 +139,8 @@
                                  md:HintAssist.Hint="Пароль"
                                  md:HintAssist.FloatingScale="0.9"
                                  Margin="0 0 0 10"></TextBox>
-                        <Button FontSize="14"
+                        <Button Command="{Binding SetPassword}"
+                                FontSize="14"
                                 Foreground="White"
                                 Margin="0 0 0 10">Задать</Button>
                     </StackPanel>

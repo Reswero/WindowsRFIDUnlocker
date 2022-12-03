@@ -1,8 +1,11 @@
-﻿namespace RFIDUnlocker.GUI.Models
+﻿using System.Text.Json.Serialization;
+
+namespace RFIDUnlocker.GUI.Models
 {
-	internal struct SecuritySettings
+	internal readonly struct SecuritySettings
 	{
-		public string Password;
+		[JsonPropertyName("password")]
+		public string Password { get; }
 
 		public SecuritySettings(string password)
 		{

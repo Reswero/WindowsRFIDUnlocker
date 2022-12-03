@@ -163,6 +163,10 @@ void setPassword(String password) {
 
 void getPassword() {
   EEPROM.get(0, securitySettings);
+
+#if DEBUG == 1
+  Serial.println(securitySettings.password);
+#endif
 }
 
 bool isCardDetected() {
