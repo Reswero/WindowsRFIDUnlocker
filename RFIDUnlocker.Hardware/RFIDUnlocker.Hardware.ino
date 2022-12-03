@@ -6,6 +6,9 @@
 #define READ_TIMEOUT_MS 5000
 #define RESPONSE_TIMEOUT_MS 200
 
+#define ACTION_ENTERED 0
+#define ACTION_NOT_ENTERED 1
+
 #define RFID_SS_PIN 10
 #define RFID_RST_PIN 2
 
@@ -56,9 +59,11 @@ void loop() {
 
     if (checkCardAccess(uid)) {
       grantAccess();
+      logAction(uid, ACTION_ENTERED);
     }
     else {
       denyAccess();
+      logAction(uid, ACTION_NOT_ENTERED);
     }
 
     delay(2000);
@@ -118,8 +123,17 @@ bool checkCardAccess(String uid) {
   return false;
 }
 
+void logAction(String uid, int action) {
+  String request = "<?log|{\"uid\":\"" + uid + "\", \"action\":\"" + action + "\"}>";
+  Serial.println(request);
+}
+
 bool isCardDetected() {
-  if (!RFID.PICC_IsNewCardPresent() && !RFID.PICC_ReadCardSerial()) {
+  if (!RFID.PICC_IsNewCardPresent()) {
+    return false;
+  }
+
+  if (!RFID.PICC_ReadCardSerial()) {
     return false;
   }
   
