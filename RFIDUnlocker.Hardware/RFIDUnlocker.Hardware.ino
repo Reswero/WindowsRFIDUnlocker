@@ -150,6 +150,8 @@ void setPassword(String password) {
   password.toCharArray(securitySettings.password, 128);
   EEPROM.put(0, securitySettings);
 
+  Serial.write("<!psw10>");
+
 #if DEBUG == 1
   Serial.println(securitySettings.password);
   EEPROM.get(0, securitySettings);
