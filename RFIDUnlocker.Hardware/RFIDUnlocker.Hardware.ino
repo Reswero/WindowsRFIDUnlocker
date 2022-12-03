@@ -1,11 +1,10 @@
 #include <MFRC522.h>
 #include <Keyboard.h>
-#include <SD.h>
+
+#define READ_TIMEOUT_MS 5000
 
 #define RFID_SS_Pin 10
 #define RFID_RST_Pin 2
-
-#define SD_SS_Pin 3
 
 #define RED_LED_PIN 9
 #define GREEN_LED_PIN 6
@@ -13,7 +12,7 @@
 
 #define MAX_LED_BRIGHTNESS 30
 
-#define BUZZER_PIN 11
+#define BUZZER_PIN 3
 #define MAX_BUZZER_FREQUENCY 100
 
 MFRC522 RFID(RFID_SS_Pin, RFID_RST_Pin);
@@ -25,9 +24,6 @@ void setup() {
 
   SPI.begin();
   RFID.PCD_Init();
-  SD.begin(SD_SS_Pin);
-
-  enableRFID();
 }
 
 void loop() {
@@ -35,15 +31,10 @@ void loop() {
     String message = Serial.readString();
 
     if (message.startsWith("<?")) {
-      handleMessage(message);
+      handleRequest(message);
     }
 
     delay(2000);
-  }
-
-  if (millis() - lastTime >= 1000) {
-    lastTime = millis();
-    initRFID();
   }
 
   if (IsCardDetected()) {
@@ -67,8 +58,8 @@ void loop() {
   }
 }
 
-void handleMessage(String message) {
-  String command = message.substring(2, message.length() - 2);
+void handleRequest(String request) {
+  String command = request.substring(2, request.length() - 2);
   
   if (command == "add") {
     addCard();
@@ -79,42 +70,26 @@ void addCard() {
   analogWrite(RED_LED_PIN, MAX_LED_BRIGHTNESS * 0.8);
   analogWrite(GREEN_LED_PIN, MAX_LED_BRIGHTNESS * 0.6);
 
-  while (!IsCardDetected()) {}
+  String response;
+  long startTime = millis();
 
-  String uid = "";
-  for (int i = 0; i < RFID.uid.size; i++) {
-    uid += String(RFID.uid.uidByte[i], HEX);
+  while (!IsCardDetected() && (millis() - startTime <= READ_TIMEOUT_MS)) {}
+
+  if (millis() - startTime < READ_TIMEOUT_MS) {
+    String uid = "";
+    for (int i = 0; i < RFID.uid.size; i++) {
+      uid += String(RFID.uid.uidByte[i], HEX);
+    }
+    uid.toUpperCase();
+
+    response = "<!add10|{\"uid\":\"" + uid + "\">";
   }
-  uid.toUpperCase();
-
-  enableSD();
-  String filePath = uid + ".crd";
-
-  if (!SD.exists(filePath)) {
-    Serial.println(filePath);
-    File file = SD.open(filePath, FILE_WRITE);
-    file.close();
+  else {
+    response = "<!add11>";
   }
   
+  Serial.println(response);
   resetAllLeds();
-  enableRFID();
-}
-
-void initRFID() {
-  digitalWrite(RFID_RST_Pin, 0);
-  delay(50);
-  digitalWrite(RFID_RST_Pin, 1);
-  RFID.PCD_Init();
-}
-
-void enableRFID() {
-  digitalWrite(RFID_SS_Pin, 1);
-  digitalWrite(SD_SS_Pin, 0);
-}
-
-void enableSD() {
-  digitalWrite(RFID_SS_Pin, 0);
-  digitalWrite(SD_SS_Pin, 1);
 }
 
 bool IsCardDetected() {
@@ -131,12 +106,7 @@ bool IsCardDetected() {
 
 bool IsUidValid(String uid) {
   
-  enableSD();
-  String filePath = uid + ".crd";
-  bool exists = SD.exists(filePath);
-  enableRFID();
-
-  if (exists) {
+  if (uid == "") {
     return true;
   }
 
