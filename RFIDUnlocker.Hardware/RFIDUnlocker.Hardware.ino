@@ -1,10 +1,13 @@
 #include <MFRC522.h>
 #include <Keyboard.h>
 
-#define READ_TIMEOUT_MS 5000
+#define DEBUG 1
 
-#define RFID_SS_Pin 10
-#define RFID_RST_Pin 2
+#define READ_TIMEOUT_MS 5000
+#define RESPONSE_TIMEOUT_MS 200
+
+#define RFID_SS_PIN 10
+#define RFID_RST_PIN 2
 
 #define RED_LED_PIN 9
 #define GREEN_LED_PIN 6
@@ -15,12 +18,13 @@
 #define BUZZER_PIN 3
 #define MAX_BUZZER_FREQUENCY 100
 
-MFRC522 RFID(RFID_SS_Pin, RFID_RST_Pin);
+MFRC522 RFID(RFID_SS_PIN, RFID_RST_PIN);
 
 long lastTime = 0;
 
 void setup() {
   Serial.begin(9600);
+  Serial.setTimeout(200);
 
   SPI.begin();
   RFID.PCD_Init();
@@ -37,7 +41,7 @@ void loop() {
     delay(2000);
   }
 
-  if (IsCardDetected()) {
+  if (isCardDetected()) {
     String uid = "";
     
     for (int i = 0; i < RFID.uid.size; i++) {
@@ -45,9 +49,12 @@ void loop() {
     }
 
     uid.toUpperCase();
-    Serial.println(uid);
 
-    if (IsUidValid(uid)) {
+#if DEBUG == 1
+    Serial.println(uid);
+#endif
+
+    if (checkCardAccess(uid)) {
       grantAccess();
     }
     else {
@@ -73,7 +80,7 @@ void addCard() {
   String response;
   long startTime = millis();
 
-  while (!IsCardDetected() && (millis() - startTime <= READ_TIMEOUT_MS)) {}
+  while (!isCardDetected() && (millis() - startTime <= READ_TIMEOUT_MS)) {}
 
   if (millis() - startTime < READ_TIMEOUT_MS) {
     String uid = "";
@@ -82,7 +89,7 @@ void addCard() {
     }
     uid.toUpperCase();
 
-    response = "<!add10|{\"uid\":\"" + uid + "\">";
+    response = "<!add10|{\"uid\":\"" + uid + "\"}>";
   }
   else {
     response = "<!add11>";
@@ -92,25 +99,31 @@ void addCard() {
   resetAllLeds();
 }
 
-bool IsCardDetected() {
-  if (!RFID.PICC_IsNewCardPresent()) {
-    return false;
-  }
+bool checkCardAccess(String uid) {
+  String request = "<?acs|{\"uid\":\"" + uid + "\"}>";
+  Serial.println(request);
 
-  if (!RFID.PICC_ReadCardSerial()) {
+  long startTime = millis();
+
+  while (Serial.available() == 0 && (millis() - startTime <= RESPONSE_TIMEOUT_MS)) {}
+
+  if (Serial.available() > 0) {
+    String response = Serial.readString();
+
+    if (response.startsWith("<!acs10>")) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+bool isCardDetected() {
+  if (!RFID.PICC_IsNewCardPresent() && !RFID.PICC_ReadCardSerial()) {
     return false;
   }
   
   return true;
-}
-
-bool IsUidValid(String uid) {
-  
-  if (uid == "") {
-    return true;
-  }
-
-  return false;
 }
 
 void grantAccess() {
