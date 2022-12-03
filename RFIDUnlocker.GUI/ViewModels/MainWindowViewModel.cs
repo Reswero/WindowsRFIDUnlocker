@@ -21,7 +21,7 @@ namespace RFIDUnlocker.GUI.ViewModels
 		public string SelectedCOMPortName { get; set; }
 		public string Password { get; set; }
 
-		#region
+		#region Commands
 
 		private RelayCommand _connectCOMPort;
 		public RelayCommand ConnectCOMPort 
@@ -37,6 +37,8 @@ namespace RFIDUnlocker.GUI.ViewModels
 						ReadTimeout = 500,
 						WriteTimeout = 500
 					};
+
+					_serialPort.Open();
 				}
 			});
 
@@ -67,6 +69,13 @@ namespace RFIDUnlocker.GUI.ViewModels
 				SendRequest(Command.Add);
 			});
 
+		private RelayCommand _close;
+		public RelayCommand Close
+			=> _close ??= new(_ =>
+			{
+				_serialPort?.Close();
+			});
+
 		#endregion
 
 		private void SendRequest(string command, object? data = null)
@@ -81,12 +90,7 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 			request += ">";
 
-			if (_serialPort is not null)
-			{
-				_serialPort.Open();
-				_serialPort.Write(request);
-				_serialPort.Close();
-			}
+			_serialPort?.Write(request);
 		}
 
 		public event PropertyChangedEventHandler? PropertyChanged;
