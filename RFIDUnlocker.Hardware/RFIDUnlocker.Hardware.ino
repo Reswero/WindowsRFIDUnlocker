@@ -1,10 +1,16 @@
 #include <MFRC522.h>
 #include <Keyboard.h>
+#include <EEPROM.h>
 
 #define DEBUG 1
 
 #define READ_TIMEOUT_MS 5000
-#define RESPONSE_TIMEOUT_MS 200
+
+#if DEBUG == 1
+  #define RESPONSE_TIMEOUT_MS 5000
+#else
+  #define RESPONSE_TIMEOUT_MS 200
+#endif
 
 #define ACTION_ENTERED 0
 #define ACTION_NOT_ENTERED 1
@@ -20,6 +26,10 @@
 
 #define BUZZER_PIN 3
 #define MAX_BUZZER_FREQUENCY 100
+
+struct {
+  char password[128];
+} securitySettings;
 
 MFRC522 RFID(RFID_SS_PIN, RFID_RST_PIN);
 
@@ -71,10 +81,18 @@ void loop() {
 }
 
 void handleRequest(String request) {
-  String command = request.substring(2, request.length() - 2);
+  String command = request.substring(2, 5);
   
   if (command == "add") {
     addCard();
+  }
+  else if (command = "psw") {
+    int startIndex = 19;
+    int endIndex = request.lastIndexOf("\"");
+
+    String password = request.substring(startIndex, endIndex);
+
+    setPassword(password);
   }
 }
 
@@ -128,6 +146,23 @@ void logAction(String uid, int action) {
   Serial.println(request);
 }
 
+void setPassword(String password) {
+  password.toCharArray(securitySettings.password, 128);
+  EEPROM.put(0, securitySettings);
+
+#if DEBUG == 1
+  Serial.println(securitySettings.password);
+  EEPROM.get(0, securitySettings);
+  Serial.println(securitySettings.password);
+  String pass = String(securitySettings.password);
+  Serial.println(pass.length());
+#endif
+}
+
+void getPassword() {
+  EEPROM.get(0, securitySettings);
+}
+
 bool isCardDetected() {
   if (!RFID.PICC_IsNewCardPresent()) {
     return false;
@@ -169,11 +204,13 @@ void resetAllLeds() {
 }
 
 void enterPassword() {
+  getPassword();
+  
   Keyboard.press(KEY_RETURN);
   Keyboard.releaseAll();
   delay(2000);
 
-  Keyboard.print("");
+  Keyboard.print(securitySettings.password);
   delay(100);
 
   Keyboard.press(KEY_RETURN);
