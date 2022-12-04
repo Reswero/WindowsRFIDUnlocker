@@ -2,7 +2,7 @@
 #include <Keyboard.h>
 #include <EEPROM.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define READ_TIMEOUT_MS 5000
 
@@ -142,7 +142,7 @@ bool checkCardAccess(String uid) {
 }
 
 void logAction(String uid, int action) {
-  String request = "<?log|{\"uid\":\"" + uid + "\", \"action\":\"" + action + "\"}>";
+  String request = "<?log|{\"uid\":\"" + uid + "\",\"action\":" + action + "}>";
   Serial.println(request);
 }
 
