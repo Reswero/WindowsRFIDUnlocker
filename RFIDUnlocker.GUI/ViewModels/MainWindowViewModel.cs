@@ -18,7 +18,7 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 		private SerialPort? _serialPort;
 
-		private JsonSerializerOptions _serializerOptions = new JsonSerializerOptions()
+		private JsonSerializerOptions _serializerOptions = new()
 		{
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 		};
@@ -27,6 +27,13 @@ namespace RFIDUnlocker.GUI.ViewModels
 		public ObservableCollection<string> COMPortNames { get; set; }
 		public string? SelectedCOMPortName { get; set; }
 		public string? Password { get; set; }
+		
+		private Card _selectedCard;
+		public Card SelectedCard
+		{
+			get => _selectedCard;
+			set => Set(ref _selectedCard, value);
+		}
 
 		#region Commands
 
@@ -71,6 +78,20 @@ namespace RFIDUnlocker.GUI.ViewModels
 			=> _addCard ??= new(_ =>
 			{
 				SendRequest(Command.Add);			
+			});
+
+		private RelayCommand? _saveCard;
+		public RelayCommand? SaveCard
+			=> _saveCard ??= new(_ =>
+			{
+				// TODO
+			});
+
+		private RelayCommand? _deleteCard;
+		public RelayCommand? DeleteCard
+			=> _deleteCard ??= new(_ =>
+			{
+				Cards.Remove(SelectedCard);
 			});
 
 		private RelayCommand? _close;
@@ -148,9 +169,9 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 				string json = request.Substring(firstBracketIndex, length);
 
-				Card card = JsonSerializer.Deserialize<Card>(json, _serializerOptions);
+				Card? card = JsonSerializer.Deserialize<Card>(json, _serializerOptions);
 
-				if (Cards.Any(c => c.UID == card.UID))
+				if (Cards.Any(c => c.UID == card?.UID))
 				{
 					SendResponse(Command.Access, status: 10);
 				}
@@ -183,6 +204,8 @@ namespace RFIDUnlocker.GUI.ViewModels
 						{
 							Cards.Add(card);
 						});
+
+						SelectedCard = card;
 					}
 				}
 				else
@@ -197,6 +220,14 @@ namespace RFIDUnlocker.GUI.ViewModels
 		private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
+
+		private void Set<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+		{
+			if (Equals(field, value)) return;
+
+			field = value;
+			OnPropertyChanged(propertyName);
 		}
 	}
 }

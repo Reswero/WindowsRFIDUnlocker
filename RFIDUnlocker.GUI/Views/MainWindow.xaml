@@ -48,7 +48,8 @@
                         <Border BorderThickness="1"
                                 BorderBrush="Gray"
                                 CornerRadius="3">
-                            <ListBox ItemsSource="{Binding Cards}">
+                            <ListBox ItemsSource="{Binding Cards}"
+                                     SelectedItem="{Binding SelectedCard}">
                                 <ListBox.ItemTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Vertical">
@@ -71,9 +72,6 @@
                         <StackPanel Grid.Row="0"
                                     Orientation="Vertical"
                                     VerticalAlignment="Center">
-                            <Button FontSize="14"
-                                    Foreground="White"
-                                    Margin="0 0 0 10">Обновить</Button>
                             <Button Command="{Binding AddCard}"
                                     FontSize="14"
                                     Foreground="White">Добавить</Button>
@@ -83,12 +81,14 @@
                                     Orientation="Vertical"
                                     VerticalAlignment="Center">
                             <TextBox IsReadOnly="True"
+                                     Text="{Binding SelectedCard.UID}"
                                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                      FontSize="14"
                                      md:HintAssist.Hint="Идентификатор карты"
                                      md:HintAssist.FloatingScale="0.9"
                                      Margin="0 0 0 10"></TextBox>
                             <TextBox FontSize="14"
+                                     Text="{Binding SelectedCard.Name}"
                                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                      md:HintAssist.Hint="Название карты"
                                      md:HintAssist.FloatingScale="0.9"
@@ -96,7 +96,8 @@
                             <Button FontSize="14"
                                     Foreground="White"
                                     Margin="0 0 0 10">Сохранить</Button>
-                            <Button FontSize="14"
+                            <Button Command="{Binding DeleteCard}"
+                                    FontSize="14"
                                     Foreground="White"
                                     Margin="0 0 0 10">Удалить</Button>
                         </StackPanel>
