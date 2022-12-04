@@ -23,7 +23,8 @@ namespace RFIDUnlocker.GUI.ViewModels
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 		};
 
-		public ObservableCollection<Card> Cards { get; set; } = new ObservableCollection<Card>();
+		public ObservableCollection<Card> Cards { get; set; } = new();
+		public ObservableCollection<ActionInfo> Actions { get; set; } = new();
 		public ObservableCollection<string> COMPortNames { get; set; }
 		public string? SelectedCOMPortName { get; set; }
 
@@ -167,15 +168,19 @@ namespace RFIDUnlocker.GUI.ViewModels
 		private void HandleRequest(string request)
 		{
 			string command = request.Substring(startIndex: 2, length: 3);
+			string json = string.Empty;
 
-			if (command == Command.Access)
+			if (request.Contains('|'))
 			{
 				int firstBracketIndex = request.IndexOf("{");
 				int lastBracketIndex = request.LastIndexOf("}");
 				int length = lastBracketIndex - firstBracketIndex + 1;
 
-				string json = request.Substring(firstBracketIndex, length);
+				json = request.Substring(firstBracketIndex, length);
+			}
 
+			if (command == Command.Access)
+			{
 				Card? card = JsonSerializer.Deserialize<Card>(json, _serializerOptions);
 
 				if (Cards.Any(c => c.UID == card?.UID))
@@ -185,6 +190,18 @@ namespace RFIDUnlocker.GUI.ViewModels
 				else
 				{
 					SendResponse(Command.Access, status: 11);
+				}
+			}
+			else if (command == Command.Log)
+			{
+				ActionInfo? actionInfo = JsonSerializer.Deserialize<ActionInfo>(json, _serializerOptions);
+
+				if (actionInfo != null)
+				{
+					App.Current.Dispatcher.Invoke(() =>
+					{
+						Actions.Add(actionInfo);
+					});
 				}
 			}
 		}
@@ -203,9 +220,9 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 					string json = response.Substring(firstBracketIndex, length);
 
-					Card card = JsonSerializer.Deserialize<Card>(json, _serializerOptions);
+					Card? card = JsonSerializer.Deserialize<Card>(json, _serializerOptions);
 
-					if (!Cards.Any(c => c.UID == card.UID))
+					if (card is not null && !Cards.Any(c => c.UID == card.UID))
 					{
 						App.Current.Dispatcher.Invoke(() =>
 						{

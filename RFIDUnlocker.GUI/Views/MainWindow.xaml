@@ -172,7 +172,7 @@
                     <Border BorderThickness="1"
                             BorderBrush="Gray"
                             CornerRadius="3">
-                        <ListBox></ListBox>
+                        <ListBox ItemsSource="{Binding Actions}"></ListBox>
                     </Border>
                 </Grid>
             </TabItem>
