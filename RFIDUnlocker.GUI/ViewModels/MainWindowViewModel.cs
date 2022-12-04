@@ -3,6 +3,7 @@ using RFIDUnlocker.GUI.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO.Ports;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
@@ -17,6 +18,12 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 		private SerialPort? _serialPort;
 
+		private JsonSerializerOptions _serializerOptions = new JsonSerializerOptions()
+		{
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+		};
+
+		public ObservableCollection<Card> Cards { get; set; } = new ObservableCollection<Card>();
 		public ObservableCollection<string> COMPortNames { get; set; }
 		public string? SelectedCOMPortName { get; set; }
 		public string? Password { get; set; }
@@ -33,10 +40,9 @@ namespace RFIDUnlocker.GUI.ViewModels
 					{
 						PortName = SelectedCOMPortName,
 						BaudRate = 9600,
-						DataBits = 8,
-						ReadTimeout = 500,
-						WriteTimeout = 500
+						DtrEnable = true
 					};
+					_serialPort.DataReceived += new SerialDataReceivedEventHandler(ReceiveMessage);
 
 					_serialPort.Open();
 				}
@@ -64,7 +70,7 @@ namespace RFIDUnlocker.GUI.ViewModels
 		public RelayCommand? AddCard
 			=> _addCard ??= new(_ =>
 			{
-				SendRequest(Command.Add);
+				SendRequest(Command.Add);				
 			});
 
 		private RelayCommand? _close;
@@ -89,6 +95,54 @@ namespace RFIDUnlocker.GUI.ViewModels
 			request += ">";
 
 			_serialPort?.Write(request);
+		}
+
+		private void ReceiveMessage(object sender, SerialDataReceivedEventArgs e)
+		{
+			string message = string.Empty;
+
+			if (_serialPort?.BytesToRead > 0)
+			{
+				message = _serialPort.ReadLine();
+			}
+
+			if (message.StartsWith("<!"))
+			{
+				HandleResponse(message);
+			}
+			else if (message.StartsWith("<?"))
+			{
+				HandleRequest(message);
+			}
+		}
+
+		private void HandleRequest(string request)
+		{
+			// TODO
+		}
+
+		private void HandleResponse(string response)
+		{
+			string command = response.Substring(startIndex: 2, length: 3);
+
+			if (command == Command.Add)
+			{
+				int firstBracketIndex = response.IndexOf("{");
+				int lastBracketIndex = response.LastIndexOf("}");
+				int length = lastBracketIndex - firstBracketIndex + 1;
+
+				string json = response.Substring(firstBracketIndex, length);
+
+				Card card = JsonSerializer.Deserialize<Card>(json, _serializerOptions);
+
+				if (!Cards.Any(c => c.UID == card.UID))
+				{
+					App.Current.Dispatcher.Invoke(() =>
+					{
+						Cards.Add(card);
+					});
+				}
+			}
 		}
 
 		public event PropertyChangedEventHandler? PropertyChanged;

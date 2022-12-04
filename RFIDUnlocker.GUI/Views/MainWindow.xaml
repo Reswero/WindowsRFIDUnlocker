@@ -48,7 +48,15 @@
                         <Border BorderThickness="1"
                                 BorderBrush="Gray"
                                 CornerRadius="3">
-                            
+                            <ListBox ItemsSource="{Binding Cards}">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Vertical">
+                                            <TextBlock Text="{Binding UID}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
                         </Border>
                     </Grid>
 
