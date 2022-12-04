@@ -70,7 +70,7 @@ namespace RFIDUnlocker.GUI.ViewModels
 		public RelayCommand? AddCard
 			=> _addCard ??= new(_ =>
 			{
-				SendRequest(Command.Add);				
+				SendRequest(Command.Add);			
 			});
 
 		private RelayCommand? _close;
@@ -97,6 +97,26 @@ namespace RFIDUnlocker.GUI.ViewModels
 			_serialPort?.Write(request);
 		}
 
+		private void SendResponse(string command, int? status = null, object? data = null)
+		{
+			string response = $"<!{command}";
+
+			if (status is not null)
+			{
+				response += status.ToString();
+			}
+
+			if (data is not null)
+			{
+				string json = JsonSerializer.Serialize(data, data.GetType());
+				response += $"|{json}";
+			}
+
+			response += ">";
+
+			_serialPort?.Write(response);
+		}
+
 		private void ReceiveMessage(object sender, SerialDataReceivedEventArgs e)
 		{
 			string message = string.Empty;
@@ -118,7 +138,27 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 		private void HandleRequest(string request)
 		{
-			// TODO
+			string command = request.Substring(startIndex: 2, length: 3);
+
+			if (command == Command.Access)
+			{
+				int firstBracketIndex = request.IndexOf("{");
+				int lastBracketIndex = request.LastIndexOf("}");
+				int length = lastBracketIndex - firstBracketIndex + 1;
+
+				string json = request.Substring(firstBracketIndex, length);
+
+				Card card = JsonSerializer.Deserialize<Card>(json, _serializerOptions);
+
+				if (Cards.Any(c => c.UID == card.UID))
+				{
+					SendResponse(Command.Access, status: 10);
+				}
+				else
+				{
+					SendResponse(Command.Access, status: 11);
+				}
+			}
 		}
 
 		private void HandleResponse(string response)
@@ -127,20 +167,27 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 			if (command == Command.Add)
 			{
-				int firstBracketIndex = response.IndexOf("{");
-				int lastBracketIndex = response.LastIndexOf("}");
-				int length = lastBracketIndex - firstBracketIndex + 1;
-
-				string json = response.Substring(firstBracketIndex, length);
-
-				Card card = JsonSerializer.Deserialize<Card>(json, _serializerOptions);
-
-				if (!Cards.Any(c => c.UID == card.UID))
+				if (response.Contains('|'))
 				{
-					App.Current.Dispatcher.Invoke(() =>
+					int firstBracketIndex = response.IndexOf('{');
+					int lastBracketIndex = response.LastIndexOf('}');
+					int length = lastBracketIndex - firstBracketIndex + 1;
+
+					string json = response.Substring(firstBracketIndex, length);
+
+					Card card = JsonSerializer.Deserialize<Card>(json, _serializerOptions);
+
+					if (!Cards.Any(c => c.UID == card.UID))
 					{
-						Cards.Add(card);
-					});
+						App.Current.Dispatcher.Invoke(() =>
+						{
+							Cards.Add(card);
+						});
+					}
+				}
+				else
+				{
+					int status = int.Parse(response.Substring(5, 2));
 				}
 			}
 		}
