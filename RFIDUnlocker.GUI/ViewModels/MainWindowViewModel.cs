@@ -26,7 +26,13 @@ namespace RFIDUnlocker.GUI.ViewModels
 		public ObservableCollection<Card> Cards { get; set; } = new ObservableCollection<Card>();
 		public ObservableCollection<string> COMPortNames { get; set; }
 		public string? SelectedCOMPortName { get; set; }
-		public string? Password { get; set; }
+
+		private string? _password;
+		public string? Password
+		{
+			get => _password;
+			set => Set(ref _password, value);
+		}
 		
 		private Card _selectedCard;
 		public Card SelectedCard
@@ -70,6 +76,7 @@ namespace RFIDUnlocker.GUI.ViewModels
 				{
 					SecuritySettings settings = new(Password);
 					SendRequest(Command.SetPassword, settings);
+					Password = string.Empty;
 				}
 			});
 
