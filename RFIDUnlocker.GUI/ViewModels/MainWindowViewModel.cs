@@ -1,4 +1,5 @@
-﻿using RFIDUnlocker.GUI.Infrastructure.Commands;
+﻿using Microsoft.Win32;
+using RFIDUnlocker.GUI.Infrastructure.Commands;
 using RFIDUnlocker.GUI.Models;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -13,15 +14,19 @@ namespace RFIDUnlocker.GUI.ViewModels
 	{
 		public MainWindowViewModel()
 		{
+			SystemEvents.SessionSwitch += OnSessionSwitch;
+
 			COMPortNames = new(SerialPort.GetPortNames());
 		}
 
-		private SerialPort? _serialPort;
-
-		private JsonSerializerOptions _serializerOptions = new()
+		private readonly JsonSerializerOptions _serializerOptions = new()
 		{
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 		};
+		
+		private SerialPort? _serialPort;
+
+		private bool _isScreenLocked = false;
 
 		public ObservableCollection<Card> Cards { get; set; } = new();
 		public ObservableCollection<ActionInfo> Actions { get; set; } = new();
@@ -183,7 +188,7 @@ namespace RFIDUnlocker.GUI.ViewModels
 			{
 				Card? card = JsonSerializer.Deserialize<Card>(json, _serializerOptions);
 
-				if (Cards.Any(c => c.UID == card?.UID))
+				if (_isScreenLocked == true && Cards.Any(c => c.UID == card?.UID))
 				{
 					SendResponse(Command.Access, status: 10);
 				}
@@ -252,6 +257,18 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 			field = value;
 			OnPropertyChanged(propertyName);
+		}
+
+		private void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
+		{
+			if (e.Reason == SessionSwitchReason.SessionLock)
+			{
+				_isScreenLocked = true;
+			}
+			else if (e.Reason == SessionSwitchReason.SessionUnlock)
+			{
+				_isScreenLocked = false;
+			}
 		}
 	}
 }
