@@ -1,6 +1,9 @@
-﻿using Microsoft.Win32;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using RFIDUnlocker.GUI.Infrastructure.Commands;
 using RFIDUnlocker.GUI.Models;
+using RFIDUnlocker.GUI.Services.Data;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO.Ports;
@@ -14,6 +17,13 @@ namespace RFIDUnlocker.GUI.ViewModels
 	{
 		public MainWindowViewModel()
 		{
+			using ApplicationContext context = new();
+			context.Cards.Load();
+			context.Actions.Load();
+
+			Cards = new(context.Cards.ToList());
+			Actions = new(context.Actions.Local.ToList());
+
 			SystemEvents.SessionSwitch += OnSessionSwitch;
 
 			COMPortNames = new(SerialPort.GetPortNames());
@@ -28,8 +38,8 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 		private bool _isScreenLocked = false;
 
-		public ObservableCollection<Card> Cards { get; set; } = new();
-		public ObservableCollection<ActionInfo> Actions { get; set; } = new();
+		public ObservableCollection<Card> Cards { get; set; }
+		public ObservableCollection<ActionInfo> Actions { get; set; }
 		public ObservableCollection<string> COMPortNames { get; set; }
 		public string? SelectedCOMPortName { get; set; }
 
@@ -134,6 +144,10 @@ namespace RFIDUnlocker.GUI.ViewModels
 			{
 				if (SelectedCard != null)
 				{
+					using ApplicationContext context = new();
+					context.Cards.Remove(SelectedCard);
+					context.SaveChanges();
+
 					Cards.Remove(SelectedCard);
 				}
 			});
@@ -238,6 +252,10 @@ namespace RFIDUnlocker.GUI.ViewModels
 					{
 						Actions.Add(actionInfo);
 					});
+
+					using ApplicationContext context = new();
+					context.Actions.Add(actionInfo);
+					context.SaveChanges();
 				}
 			}
 		}
@@ -264,6 +282,10 @@ namespace RFIDUnlocker.GUI.ViewModels
 						{
 							Cards.Add(card);
 						});
+
+						using ApplicationContext context = new();
+						context.Cards.Add(card);
+						context.SaveChanges();
 
 						SelectedCard = card;
 					}
