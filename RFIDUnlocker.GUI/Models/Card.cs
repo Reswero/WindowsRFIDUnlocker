@@ -5,19 +5,24 @@ namespace RFIDUnlocker.GUI.Models
 {
     internal class Card : INotifyPropertyChanged
     {
-        public string UID { get; init; }
-
-        public string? _name;
-        public string? Name
-        {
-            get => _name;
-            set => Set(ref _name, value);
-        }
-
         public Card(string uid)
         {
             UID = uid;
         }
+
+		public string UID { get; init; }
+
+		public string? _name = "Без названия";
+		public string? Name
+		{
+			get => _name;
+			set => Set(ref _name, value);
+		}
+
+		public override string ToString()
+		{
+			return $"[{UID}] {Name}";
+		}
 
 		public event PropertyChangedEventHandler? PropertyChanged;
 

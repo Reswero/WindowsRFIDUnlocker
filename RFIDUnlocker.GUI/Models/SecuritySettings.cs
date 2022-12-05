@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace RFIDUnlocker.GUI.Models
+﻿namespace RFIDUnlocker.GUI.Models
 {
 	internal readonly struct SecuritySettings
 	{
