@@ -7,6 +7,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Windows.Documents;
 
 namespace RFIDUnlocker.GUI.ViewModels
 {
@@ -33,6 +34,13 @@ namespace RFIDUnlocker.GUI.ViewModels
 		public ObservableCollection<string> COMPortNames { get; set; }
 		public string? SelectedCOMPortName { get; set; }
 
+		private bool _isPortConnected = false;
+		public bool IsPortConnected
+		{
+			get => _isPortConnected;
+			set => Set(ref _isPortConnected, value);
+		}
+
 		private string? _password;
 		public string? Password
 		{
@@ -40,8 +48,8 @@ namespace RFIDUnlocker.GUI.ViewModels
 			set => Set(ref _password, value);
 		}
 		
-		private Card _selectedCard;
-		public Card SelectedCard
+		private Card? _selectedCard;
+		public Card? SelectedCard
 		{
 			get => _selectedCard;
 			set => Set(ref _selectedCard, value);
@@ -49,22 +57,43 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 		#region Commands
 
-		private RelayCommand? _connectCOMPort;
-		public RelayCommand? ConnectCOMPort 
-			=> _connectCOMPort ??= new(_ =>
+		private RelayCommand? _changePortConnectionState;
+		public RelayCommand? ChangePortConnectionState 
+			=> _changePortConnectionState ??= new(_ =>
 			{
-				if (SelectedCOMPortName != null)
+				try
 				{
-					_serialPort = new()
+					if (_serialPort == null)
 					{
-						PortName = SelectedCOMPortName,
-						BaudRate = 9600,
-						DtrEnable = true
-					};
-					_serialPort.DataReceived += new SerialDataReceivedEventHandler(ReceiveMessage);
+						if (SelectedCOMPortName != null)
+						{
+							_serialPort = new()
+							{
+								PortName = SelectedCOMPortName,
+								BaudRate = 9600,
+								DtrEnable = true
+							};
+							_serialPort.DataReceived += new SerialDataReceivedEventHandler(ReceiveMessage);
 
-					_serialPort.Open();
+							_serialPort.Open();
+							IsPortConnected = true;
+						}
+					}
+					else
+					{
+						if (IsPortConnected is true)
+						{
+							_serialPort.Close();
+							IsPortConnected = false;
+						}
+						else
+						{
+							_serialPort.Open();
+							IsPortConnected = true;
+						}
+					}
 				}
+				catch { }
 			});
 
 		private RelayCommand? _disconnectCOMPort;
@@ -104,7 +133,10 @@ namespace RFIDUnlocker.GUI.ViewModels
 		public RelayCommand? DeleteCard
 			=> _deleteCard ??= new(_ =>
 			{
-				Cards.Remove(SelectedCard);
+				if (SelectedCard != null)
+				{
+					Cards.Remove(SelectedCard);
+				}
 			});
 
 		private RelayCommand? _close;
