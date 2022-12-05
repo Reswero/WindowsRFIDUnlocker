@@ -7,7 +7,6 @@ using System.IO.Ports;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Windows.Documents;
 
 namespace RFIDUnlocker.GUI.ViewModels
 {

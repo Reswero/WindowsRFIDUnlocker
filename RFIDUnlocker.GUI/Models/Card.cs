@@ -5,10 +5,14 @@ namespace RFIDUnlocker.GUI.Models
 {
     internal class Card : INotifyPropertyChanged
     {
+        public Card() { }
+
         public Card(string uid)
         {
             UID = uid;
         }
+
+        public int Id { get; set; }
 
 		public string UID { get; init; }
 

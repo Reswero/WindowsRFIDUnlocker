@@ -5,12 +5,15 @@ namespace RFIDUnlocker.GUI.Models
 {
 	internal class ActionInfo
 	{
+		public ActionInfo() { }
+
 		public ActionInfo(string uid, ActionType type)
 		{
 			UID = uid;
 			Type = type;
 		}
 
+		public int Id { get; set; }
 		public string UID { get; init; }
 
 		[JsonPropertyName("action")]
