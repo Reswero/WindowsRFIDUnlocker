@@ -40,8 +40,8 @@ namespace RFIDUnlocker.GUI.ViewModels
 		public ObservableCollection<Card> Cards { get; set; }
 		public ObservableCollection<ActionInfo> Actions { get; set; }
 
-		private ObservableCollection<string> _comPortNames;
-		public ObservableCollection<string> COMPortNames
+		private ObservableCollection<string>? _comPortNames;
+		public ObservableCollection<string>? COMPortNames
 		{
 			get => _comPortNames;
 			set => Set(ref _comPortNames, value);
@@ -72,8 +72,8 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 		#region Commands
 
-		private RelayCommand _getCOMPortNames;
-		public RelayCommand GetCOMPortNames
+		private RelayCommand? _getCOMPortNames;
+		public RelayCommand? GetCOMPortNames
 			=> _getCOMPortNames ??= new(_ =>
 			{
 				COMPortNames = new(SerialPort.GetPortNames());
