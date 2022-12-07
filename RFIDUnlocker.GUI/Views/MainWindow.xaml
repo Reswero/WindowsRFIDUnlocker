@@ -142,7 +142,13 @@
                                   Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                   md:HintAssist.Hint="COM-Порт"
                                   md:HintAssist.FloatingScale="0.9"
-                                  Margin="0 0 0 10"></ComboBox>
+                                  Margin="0 0 0 10">
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="DropDownOpened">
+                                    <b:InvokeCommandAction Command="{Binding GetCOMPortNames}"/>
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </ComboBox>
                         <Button Command="{Binding ChangePortConnectionState}"
                                 Content="{Binding IsPortConnected,
                             Converter={StaticResource BoolToPortConnectionConverter}}"

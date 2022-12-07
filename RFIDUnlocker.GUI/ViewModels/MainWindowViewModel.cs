@@ -39,7 +39,14 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 		public ObservableCollection<Card> Cards { get; set; }
 		public ObservableCollection<ActionInfo> Actions { get; set; }
-		public ObservableCollection<string> COMPortNames { get; set; }
+
+		private ObservableCollection<string> _comPortNames;
+		public ObservableCollection<string> COMPortNames
+		{
+			get => _comPortNames;
+			set => Set(ref _comPortNames, value);
+		}
+
 		public string? SelectedCOMPortName { get; set; }
 
 		private bool _isPortConnected = false;
@@ -65,6 +72,13 @@ namespace RFIDUnlocker.GUI.ViewModels
 
 		#region Commands
 
+		private RelayCommand _getCOMPortNames;
+		public RelayCommand GetCOMPortNames
+			=> _getCOMPortNames ??= new(_ =>
+			{
+				COMPortNames = new(SerialPort.GetPortNames());
+			});
+		
 		private RelayCommand? _changePortConnectionState;
 		public RelayCommand? ChangePortConnectionState 
 			=> _changePortConnectionState ??= new(_ =>
