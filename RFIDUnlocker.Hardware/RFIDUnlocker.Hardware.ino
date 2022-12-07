@@ -5,7 +5,6 @@
 #define DEBUG 0
 
 #define READ_TIMEOUT_MS 5000
-
 #if DEBUG == 1
   #define RESPONSE_TIMEOUT_MS 5000
 #else
@@ -21,7 +20,6 @@
 #define RED_LED_PIN 9
 #define GREEN_LED_PIN 6
 #define BLUE_LED_PIN 5
-
 #define MAX_LED_BRIGHTNESS 30
 
 #define BUZZER_PIN 3
@@ -32,8 +30,6 @@ struct {
 } securitySettings;
 
 MFRC522 RFID(RFID_SS_PIN, RFID_RST_PIN);
-
-long lastTime = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -97,8 +93,7 @@ void handleRequest(String request) {
 }
 
 void addCard() {
-  analogWrite(RED_LED_PIN, MAX_LED_BRIGHTNESS * 0.8);
-  analogWrite(GREEN_LED_PIN, MAX_LED_BRIGHTNESS * 0.6);
+  lightLed(1, 0.2, 0);
 
   String response;
   long startTime = millis();
@@ -190,6 +185,12 @@ void grantAccess() {
 void denyAccess() {
   blinkLed(RED_LED_PIN);
   playDenySound();
+}
+
+void lightLed(float redMultiplier, float greenMultiplier, float blueMultiplier) {
+  analogWrite(RED_LED_PIN, MAX_LED_BRIGHTNESS * redMultiplier);
+  analogWrite(GREEN_LED_PIN, MAX_LED_BRIGHTNESS * greenMultiplier);
+  analogWrite(BLUE_LED_PIN, MAX_LED_BRIGHTNESS * blueMultiplier);
 }
 
 void blinkLed(int ledPin) {
