@@ -3,7 +3,6 @@ using Microsoft.Win32;
 using RFIDUnlocker.GUI.Infrastructure.Commands;
 using RFIDUnlocker.GUI.Models;
 using RFIDUnlocker.GUI.Services.Data;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO.Ports;
@@ -135,7 +134,12 @@ namespace RFIDUnlocker.GUI.ViewModels
 		public RelayCommand? SaveCard
 			=> _saveCard ??= new(_ =>
 			{
-				// TODO
+				if (SelectedCard != null)
+				{
+					using ApplicationContext context = new();
+					context.Cards.Update(SelectedCard);
+					context.SaveChanges();
+				}
 			});
 
 		private RelayCommand? _deleteCard;
