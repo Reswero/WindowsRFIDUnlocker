@@ -15,6 +15,7 @@ namespace RFIDUnlocker.GUI.Models
 
 		public int Id { get; set; }
 		public string UID { get; init; }
+		public DateTime Date { get; init; } = DateTime.Now;
 
 		[JsonPropertyName("action")]
 		public ActionType Type { get; init; }
@@ -27,7 +28,7 @@ namespace RFIDUnlocker.GUI.Models
 				ActionType.NotEntered => "Попытка входа",
 				_ => "Неизвестное действие",
 			};
-			return $"{DateTime.Now:dd.MM.yy HH.mm} | [{UID}] {actionMessage}";
+			return $"{Date:dd.MM.yy HH.mm} | [{UID}] {actionMessage}";
 		}
 	}
 
